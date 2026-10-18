@@ -1,0 +1,11 @@
+{
+  "generated": "2026-10-12",
+  "source": "OpenStreetMap contributors / download.openstreetmap.fr",
+  "license": "ODbL 1.0",
+  "segments": 12807,
+  "named_streets_per_city": {
+    "Navegantes": 784,
+    "Itajaí": 1652,
+    "Balneário Camboriú": 742
+  }
+}

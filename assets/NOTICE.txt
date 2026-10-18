@@ -1,0 +1,9 @@
+Zelo — base cartográfica local
+Ruas © OpenStreetMap contributors, distribuídas sob Open Database License (ODbL) 1.0.
+https://www.openstreetmap.org/copyright
+https://opendatacommons.org/licenses/odbl/1-0/
+Fonte: extrato Santa Catarina / download.openstreetmap.fr. Download: 2026-10-12.
+Base derivada distribuída em streets.json; script de extração disponível no projeto.
+Limites municipais: IBGE, API de malhas simplificadas v3 (qualidade maxima).
+https://servicodados.ibge.gov.br/api/docs/malhas?versao=3
+Os exemplos de ocorrências não representam reclamações ou atendimentos reais.
