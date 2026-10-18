@@ -1,80 +1,75 @@
-# Zelo em Flutter para Android
+# Zelo — React Native
 
-Portabilidade da versão Android Java do Zelo encontrada no chat **Criar app colaborativo de zeladoria**, de 12/10/2026. A interface, o mapa e as regras de domínio foram escritos em Dart/Flutter. O código Java restante é uma ponte pequena para localização, seletor de imagens e armazenamento Android.
+Protótipo acadêmico do HOW VIII (UNIVALI), a partir da proposta de iluminação pública desenvolvida no HOW IV, Hands on Work. Relatos de manutenção urbana em Navegantes, Itajaí e Balneário Camboriú.
 
-## Funcionalidades
+## Executar no Android
 
-- Interface escura com destaque verde, voltada ao celular Android.
-- Mapa vetorial offline com deslocamento, pinça, zoom, seleção de ponto e marcadores.
-- Área atendida: **Navegantes, Itajaí e Balneário Camboriú**, validada por polígonos municipais.
-- Base real embarcada: 12.807 trechos e 3.178 pares de nome de rua/município (784, 1.652 e 742, respectivamente).
-- Sugestões de ruas a partir de dois caracteres, até oito opções, sem distinguir acentos; no formulário, restritas à cidade do ponto escolhido.
-- Localização atual sob demanda, com pedido de permissão, limite de 20 segundos, validade de 30 segundos e precisão de até 100 metros. Sem localização válida, escolha manual no mapa.
-- Nove categorias: iluminação pública, buraco na via, entulho, calçada, sinalização, obra parada, alagamento, esgoto a céu aberto e outros.
-- Cadastro com referência, descrição, prioridade percebida, foto opcional e identificador.
-- Fotos copiadas para a pasta privada do aplicativo, até 20 MB por imagem. Fotos removidas de um rascunho podem permanecer como arquivos sem referência até a limpeza dos dados do app.
-- Abas **Mapa**, **Perto de mim** (1, 3 e 5 km em linha reta) e **Acompanhando**.
-- Apoio, acompanhamento e histórico locais. Cadastro passa a ser acompanhado automaticamente.
-- Gravações serializadas e confirmação somente após persistência; falha de gravação mantém o formulário.
-- Dados corrompidos geram aviso; não são substituídos silenciosamente pelos exemplos.
-
-## Experimentar e compilar
-
-Projeto criado e verificado com **Flutter 3.47.7 / Dart 3.13.5**, JDK 21, Android API 36 e Gradle Wrapper incluído. Android mínimo: 8.0 / API 26.
+Requisitos: Node.js 22.13 ou superior, Android Studio com SDK, emulador aberto e Java 17 ou superior (recomendado: JDK do Android Studio). Abra esta pasta no VS Code.
 
 ```sh
-flutter pub get
-flutter analyze
-flutter test
-flutter run
-flutter build apk --debug --target-platform android-arm64
+npm install
+npm run android
 ```
 
-Abra esta pasta no Android Studio ou VS Code com Flutter instalado. Configure o SDK Android e JDK 21 na sua máquina. O `pubspec.lock` fixa as dependências resolvidas. Não há dependências de plugins externos para mapas, GPS, fotos ou persistência; os recursos de dispositivo são expostos por `MethodChannel`.
+O segundo comando gera o projeto nativo, compila e instala o novo **Zelo, com ícone azul**. Na primeira compilação, o Gradle poderá baixar o NDK 27.1.12297006, CMake e outros componentes Android. Aceite as licenças pelo SDK Manager se solicitado.
 
-O APK de desenvolvimento ARM64 fica em `build/app/outputs/flutter-apk/app-debug.apk`. A assinatura de desenvolvimento permite experimentar, mas não é uma assinatura de distribuição. Não há publicação na Play Store. Consulte `VERIFICACAO.md` para a situação exata do build desta entrega.
+Com o aplicativo instalado, para continuar editando:
 
-## O que ainda não existe
+```sh
+npm start
+```
 
-É um **protótipo funcional local**. Não há servidor, Firebase configurado, contas, sincronização entre moradores, autenticação de prefeituras, moderação, respostas oficiais ou notificações push. Os apoios não são votos compartilhados entre usuários. A prioridade é declarada pelo morador, sem algoritmo de urgência. A proposta futura prevê uso gratuito pelos moradores e adesão municipal; não há contratação ou cobrança no app.
+Deixe o terminal aberto e abra o Zelo com ícone azul no emulador. Se reiniciar o emulador, use `npm run android` para restabelecer a conexão de desenvolvimento. Mudanças em TypeScript atualizam pela recarga do Metro. Mudanças em dependências nativas exigem `npm run android` novamente. Se o SDK não for encontrado, configure `ANDROID_HOME` para `$HOME/Library/Android/sdk`.
 
-Os nove registros iniciais são fictícios e marcados **EXEMPLO**. Novos registros são marcados **LOCAL**. O aplicativo não encaminha demandas à prefeitura. O painel administrativo da primeira versão web não foi reintroduzido: a migração preserva a última versão Android focada no mapa.
+## Mapa local, sem chave de API
 
-O pacote Flutter usa identidade Android e armazenamento próprios. Instala ao lado da versão Java e **não importa automaticamente seus relatos locais**. Mantenha a instalação anterior se precisar dos dados. Não foi aplicado um procedimento de migração de dados pessoais entre aplicativos.
+O mapa anterior foi adaptado para React Native. Ele desenha os dados locais de ruas OpenStreetMap e limites municipais do IBGE, com `react-native-svg`. Funciona offline, sem serviços de mapas pagos, sem chave de API e sem cadastro no Google Cloud.
 
-Limpar dados ou desinstalar remove relatos e fotografias privados desta versão. O backup automático Android está desativado. A versão principal não pede internet nem rastreia localização em segundo plano; os manifests debug/profile permitem a conexão das ferramentas Flutter durante desenvolvimento.
+O visual se inspira no Google Maps: fundo neutro, água azul, ruas claras, contornos suaves, vias principais destacadas e nomes das ruas. O tema escuro usa superfícies em cinza, textos claros e água azul escura. O conteúdo é o catálogo local das três cidades; não há dados de trânsito, imagens de satélite nem catálogo atualizado de estabelecimentos.
 
-## Organização
+- Arraste para mover o mapa; use dois dedos ou os botões `+` e `−` para o zoom.
+- **Escolher ponto no mapa**: selecione a cidade, busque uma rua ou arraste o mapa até o pin central. Confirme o ponto e complete o relato. Não exige localização do aparelho.
+- Segure um ponto no mapa principal para iniciar a seleção manual.
+- **GPS**: opcional; solicita somente localização em primeiro plano. Se estiver fora da região, escolha manualmente um ponto em uma das três cidades.
+- **Tema**: claro, escuro ou acompanhar o sistema. A escolha é salva no aparelho.
 
-- `lib/main.dart`: telas, navegação, cadastro e detalhe.
-- `lib/map_view.dart`: mapa vetorial Flutter com CustomPainter.
-- `lib/geo.dart`: distâncias, polígonos e projeção sobre ruas.
-- `lib/catalog.dart`: leitura do catálogo e sugestões de endereços.
-- `lib/reports.dart`: registros, validação e persistência transacional local.
-- `lib/platform.dart`: contrato de localização, foto e armazenamento Android.
-- `android/.../MainActivity.java`: implementação do canal Android.
-- `android/.../CurrentLocation.java`: aquisição limitada de posição, reaproveitada da versão Java.
-- `test/`: testes de regras e widgets.
-- `assets/`: dados cartográficos, atribuição e licença ODbL.
+Os marcadores usam ícones de lâmpada, alerta, lixeira, pedestre, semáforo, construção, inundação, gota e mais opções. A cor indica prioridade: azul baixa, âmbar média e vermelho alta; verde indica conclusão.
 
-## Verificações e limites
+## Relatos e dados
 
-A suíte verifica geometria com a base real, rejeição de municípios vizinhos, busca por acentos, sugestões por município, distâncias e raios, validade da posição, persistência, falhas de disco, mudanças concorrentes, dados corrompidos, formulário e interações. Os testes de widgets usam dimensões de celular. A ponte Android foi compilada no build, mas ainda precisa de execução em aparelho/emulador.
+Fotos, relatos, apoios e acompanhamento ficam neste aparelho. Exemplos fictícios estão identificados. Não há autenticação, sincronização entre aparelhos, envio à prefeitura ou acompanhamento oficial.
 
-Não há evidência de que toda a implementação Java original tenha seguido TDD. Nesta portabilidade foram adicionadas verificações automatizadas dos comportamentos migrados. Os próximos incrementos podem seguir ciclos TDD de teste inicialmente reprovado, implementação e refatoração.
+**Perto de mim** usa uma posição obtida sob solicitação, com horário exibido e raio de 1, 3 ou 5 km. Atualize a posição ao mudar de local. O endereço sugerido pelo catálogo deve ser conferido no formulário.
 
-Ainda é necessário testar em dispositivo: GPS real, permissões negadas/aproximadas, seletor de fotos, teclado, botão Voltar, retomada do processo e desempenho do mapa. O rascunho é mantido durante erros de gravação na tela aberta, mas não possui restauração garantida após encerramento do processo Android. Não houve avaliação com moradores ou integração municipal.
+A instalação usa o pacote `br.com.zelo.reactnative` e pode coexistir com a versão anterior. Dados salvos pela versão anterior não são importados automaticamente.
 
-A base geográfica foi copiada sem alterações da versão anterior. Pode estar incompleta ou desatualizada. Os limites municipais são simplificados e não substituem levantamento de precisão. Não há geocodificação de números de imóveis.
+## Estrutura
 
-## Fontes e licenças
+- `src/app/`: navegação Expo Router e interface React Native.
+- `src/components/LocalMap.tsx`: desenho do mapa local, marcadores e gestos.
+- `src/domain/`: limites municipais, ruas, projeção e regras dos relatos.
+- `src/services/device.ts`: persistência, localização e seleção de fotos.
+- `src/theme.ts`: paleta clara e escura.
+- `app.config.ts`: configuração nativa gerada pelo Expo.
+- `assets/`: catálogo local, com atribuições e licenças em `NOTICE.txt` e `ODbL-1.0.txt`.
+- `licenses/`: licença do template Expo utilizado na estrutura inicial.
 
-Ruas: © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/). Preserve `assets/NOTICE.txt` e `assets/ODbL-1.0.txt` ao redistribuir os dados derivados. Os registros dos moradores são armazenados separadamente.
+## Verificação
 
-Limites: [API de malhas IBGE](https://servicodados.ibge.gov.br/api/docs/malhas?versao=3), municípios 4211306, 4208203 e 4202008. A extração e a documentação de origem encontram-se na versão Java anterior.
+```sh
+npm run typecheck
+npm run lint
+npm test
+```
 
-Implementação: [canais de plataforma Flutter](https://docs.flutter.dev/platform-integration/platform-channels) e [testes unitários Flutter](https://docs.flutter.dev/cookbook/testing/unit/introduction).
+Os testes cobrem limites, buracos em polígonos, ruas, exemplos, precisão e validade temporal do GPS, raio de busca, gravação com falha, ações simultâneas, projeção e movimento do mapa.
 
-## Reconstruir a base cartográfica
+## Conexão do modo de desenvolvimento
 
-`tools/build_catalog.py` foi preservado da versão Java. Requer Python, osmium e shapely, um extrato OSM e os três GeoJSON municipais IBGE. Execute passando como terceiro argumento a pasta `assets` deste projeto. A reconstrução não é necessária para compilar o app; os dados já estão embarcados.
+Se aparecer `Unable to load script`, mantenha o Metro aberto e execute no macOS:
+
+```sh
+"$HOME/Library/Android/sdk/platform-tools/adb" reverse tcp:8081 tcp:8081
+```
+
+No menu de desenvolvimento do aplicativo, em **Change Bundle Location**, use `localhost:8081` e aplique. Em versões recentes do Android, permita a conexão local solicitada para o modo de desenvolvimento. O mapa em si usa dados locais.
