@@ -1,0 +1,12 @@
+Zelo 2.0.0 — APK de demonstração
+
+Pacote: br.com.zelo.reactnative
+Versão: 2.0.0 (código 2)
+Arquitetura: arm64-v8a
+Android mínimo: API 24
+
+Gerado a partir da compilação Android de depuração existente, com o bundle JavaScript de produção e os assets atuais incorporados. A nova compilação Gradle foi bloqueada pela restrição de sockets locais desta sessão.
+
+Assinatura de desenvolvimento verificada por apksigner (v2 e v3). Alinhamento verificado por zipalign. Bundle incluído em assets/index.android.bundle; confirmadas a base DEMO-V2 e as opções de seleção da Home.
+
+Não foi executado no emulador nesta sessão. O pacote mantém recursos de desenvolvimento; destina-se à demonstração acadêmica, não à publicação na Google Play.
