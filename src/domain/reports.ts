@@ -1,5 +1,5 @@
 import { Point, validPoint, distance } from "./geo";
-import { cityAt, cities, searchStreets, streetPoint } from "./catalog";
+import { cityAt, cities, streets } from "./catalog";
 export const categories = [
   { name: "Iluminação pública", icon: "lightbulb-outline" },
   { name: "Buraco na via", icon: "warning-amber" },
@@ -67,39 +67,53 @@ export function validReport(r: Report) {
     )
   );
 }
+const DEMO_PREFIX = "DEMO-V2-";
+const demoTitles = [
+  ["Poste com lâmpada apagada", "Iluminação intermitente", "Trecho com pouca iluminação", "Luminária acesa durante o dia"],
+  ["Buraco próximo ao cruzamento", "Asfalto danificado", "Desnível na pista", "Pavimento com vários buracos"],
+  ["Entulho na margem da rua", "Resíduos de obra acumulados", "Descarte de móveis", "Lixo acumulado em terreno"],
+  ["Calçada com piso quebrado", "Passagem de pedestres obstruída", "Calçada com desnível", "Trecho sem acessibilidade"],
+  ["Placa de trânsito danificada", "Faixa de pedestres apagada", "Sinalização pouco visível", "Placa encoberta"],
+  ["Obra sem atividade aparente", "Materiais de obra na passagem", "Área de obra sem proteção", "Intervenção viária incompleta"],
+  ["Água acumulada após chuva", "Bueiro com escoamento bloqueado", "Trecho com alagamento", "Drenagem insuficiente"],
+  ["Vazamento aparente de esgoto", "Água com odor na via", "Esgoto próximo à calçada", "Canal com despejo aparente"],
+  ["Equipamento urbano danificado", "Banco de praça quebrado", "Lixeira pública danificada", "Necessidade de limpeza"],
+];
 export function seedReports(now = Date.now()): Report[] {
-  let n = 0;
-  return cities.flatMap((city) =>
-    searchStreets("rua", city.id)
-      .slice(0, 3)
-      .map((street) => {
-        const category = n++ % categories.length;
-        return {
-          id: "EX-" + n,
-          title: categories[category].name + " · exemplo",
-          address: street.name + " · " + city.name,
-          cityId: city.id,
-          description:
-            "Ocorrência fictícia para experimentar o aplicativo. Não é uma reclamação real.",
-          category,
-          point: streetPoint(street, city.center),
-          created: now - n * 3600000,
-          status: n % 3 === 0 ? "Em andamento" : "Aberta",
-          priority: n % 3 === 0 ? "Alta" : "Média",
-          photo: "",
-          votes: n + 2,
-          following: false,
-          supported: false,
-          demo: true,
-          history: [
-            {
-              time: now - n * 3600000,
-              text: "Exemplo ilustrativo. Sem resposta oficial.",
-            },
-          ],
-        };
-      }),
-  );
+  return cities.flatMap((city) => {
+    const used = new Set<string>();
+    const candidates = streets.filter((street) => street.cityId === city.id)
+      .flatMap((street) => {
+        const point = street.points[Math.floor(street.points.length / 2)];
+        if (!point || cityAt(point)?.id !== city.id) return [];
+        const key = street.normalized;
+        if (used.has(key)) return [];
+        used.add(key);
+        return [{ street, point }];
+      }).sort((a, b) => a.street.name.localeCompare(b.street.name, "pt-BR"));
+    return Array.from({ length: 36 }, (_, i): Report => {
+      const { street, point } = candidates[Math.floor(i * candidates.length / 36)];
+      const category = i % categories.length;
+      const variant = Math.floor(i / categories.length);
+      const created = now - (i + 1) * 5 * 3600000;
+      const status = (["Aberta", "Aberta", "Em andamento", "Concluída"] as const)[(i + variant) % 4];
+      return {
+        id: DEMO_PREFIX + city.id + "-" + i,
+        title: demoTitles[category][variant] + " · exemplo",
+        address: street.name + " · " + city.name,
+        cityId: city.id,
+        description: "EXEMPLO FICTÍCIO: " + demoTitles[category][variant] + ". Registro criado apenas para demonstrar os recursos do Zelo. Não representa uma ocorrência real nem atendimento da prefeitura.",
+        category, point, created, status,
+        priority: priorities[(i + variant) % priorities.length],
+        photo: "", votes: (i * 7 + variant * 3) % 43,
+        following: false, supported: false, demo: true,
+        history: [
+          { time: created, text: "Exemplo fictício cadastrado para demonstração." },
+          ...(status === "Aberta" ? [] : [{ time: created + 3600000, text: "Situação ilustrativa: " + status + ". Sem resposta oficial." }]),
+        ],
+      };
+    });
+  });
 }
 export class Reports {
   private data: Report[] = [];
@@ -123,7 +137,13 @@ export class Reports {
       const data: unknown = JSON.parse(raw);
       if (!Array.isArray(data) || !data.every(validReport))
         throw Error("Os dados locais estão inválidos e foram preservados.");
-      this.data = data;
+      // Replace previous demo data once; retain every user-created report.
+      if (!data.some((r) => r.demo && r.id.startsWith(DEMO_PREFIX))) {
+        const next = [...data.filter((r) => !r.demo), ...seedReports()];
+        if (!next.every(validReport)) throw Error("Base de exemplos inválida.");
+        await this.storage.write(JSON.stringify(next));
+        this.data = next;
+      } else this.data = data;
     }
   }
   private change(fn: (rows: Report[]) => Report[]) {

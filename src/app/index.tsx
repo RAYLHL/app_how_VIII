@@ -61,6 +61,9 @@ export default function App() {
   const [tab, setTab] = useState<Mode>("Mapa"),
     [cityId, setCityId] = useState(cities[0].id),
     [category, setCategory] = useState(-1);
+  const [homeSelect, setHomeSelect] = useState<"city" | "category" | null>(
+    null,
+  );
   const [query, setQuery] = useState(""),
     [fix, setFix] = useState<Fix | null>(null),
     [radius, setRadius] = useState(3),
@@ -420,25 +423,46 @@ export default function App() {
           </View>
           {button("Tema", () => setSettings(true), "contrast")}
         </View>
-        <View style={{ paddingHorizontal: 16, gap: 10, paddingBottom: 10 }}>
-          {cityButtons()}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={s.row}
-          >
-            {button("Todos", () => setCategory(-1), undefined, category < 0)}
-            {categories.map((item, i) => (
-              <React.Fragment key={item.name}>
-                {button(
-                  item.name,
-                  () => setCategory(i),
-                  item.icon,
-                  category === i,
-                )}
-              </React.Fragment>
-            ))}
-          </ScrollView>
+        <View style={{ paddingHorizontal: 16, gap: 10, paddingBottom: 12 }}>
+          {tab === "Mapa" && search()}
+          <View style={s.row}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Selecionar cidade: ${city.name}`}
+              accessibilityState={{ expanded: homeSelect === "city" }}
+              onPress={() => setHomeSelect("city")}
+              style={[
+                s.select,
+                { backgroundColor: c.surface, borderColor: c.border },
+              ]}
+            >
+              <Text
+                numberOfLines={1}
+                style={{ flex: 1, color: c.text, fontSize: 15 }}
+              >
+                {city.name}
+              </Text>
+              <MaterialIcons name="expand-more" size={24} color={c.secondary} />
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Selecionar categoria: ${category < 0 ? "Todas" : categories[category].name}`}
+              accessibilityState={{ expanded: homeSelect === "category" }}
+              onPress={() => setHomeSelect("category")}
+              style={[
+                s.select,
+                { backgroundColor: c.surface, borderColor: c.border },
+              ]}
+            >
+              <Text
+                numberOfLines={1}
+                style={{ flex: 1, color: c.text, fontSize: 15 }}
+              >
+                {category < 0 ? "Categorias" : categories[category].name}
+              </Text>
+              <MaterialIcons name="expand-more" size={24} color={c.secondary} />
+            </Pressable>
+          </View>
         </View>
         {tab === "Mapa" ? (
           <View style={s.full}>
@@ -470,7 +494,6 @@ export default function App() {
                 ))}
               </MapView>
             }
-            <View style={s.search}>{search()}</View>
             <View style={{ padding: 12, gap: 8, backgroundColor: c.surface }}>
               <View style={s.wrap}>
                 {button(
@@ -792,6 +815,103 @@ export default function App() {
           </SafeAreaView>
         </Modal>
         <Modal
+          visible={homeSelect !== null}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setHomeSelect(null)}
+        >
+          <View style={s.scrim}>
+            <Pressable
+              style={StyleSheet.absoluteFill}
+              accessibilityLabel="Fechar seleção"
+              onPress={() => setHomeSelect(null)}
+            />
+            <View
+              style={[
+                s.dialog,
+                { backgroundColor: c.surface, maxHeight: "80%" },
+              ]}
+            >
+              <View style={s.row}>
+                <View style={{ flex: 1 }}>
+                  {text(
+                    homeSelect === "city"
+                      ? "Selecionar cidade"
+                      : "Selecionar categoria",
+                    { fontSize: 20, fontWeight: "700" },
+                  )}
+                </View>
+                {button("Fechar", () => setHomeSelect(null), "close")}
+              </View>
+              <ScrollView>
+                {(homeSelect === "city"
+                  ? cities.map((item) => ({
+                      id: item.id,
+                      name: item.name,
+                      icon: "location-city" as const,
+                    }))
+                  : [
+                      {
+                        id: "-1",
+                        name: "Todas as categorias",
+                        icon: "apps" as const,
+                      },
+                      ...categories.map((item, i) => ({
+                        id: String(i),
+                        ...item,
+                      })),
+                    ]
+                ).map((item) => {
+                  const active =
+                    homeSelect === "city"
+                      ? item.id === cityId
+                      : Number(item.id) === category;
+                  return (
+                    <Pressable
+                      key={item.id}
+                      accessibilityRole="radio"
+                      accessibilityState={{ checked: active }}
+                      onPress={() => {
+                        if (homeSelect === "city") {
+                          const next = cities.find((x) => x.id === item.id)!;
+                          setCityId(next.id);
+                          setQuery("");
+                          mainMap.current?.animateToRegion(region(next.center));
+                        } else setCategory(Number(item.id));
+                        setHomeSelect(null);
+                      }}
+                      style={[
+                        s.option,
+                        { backgroundColor: active ? c.primarySoft : c.surface },
+                      ]}
+                    >
+                      <MaterialIcons
+                        name={item.icon}
+                        size={24}
+                        color={active ? c.primary : c.secondary}
+                      />
+                      <View style={{ flex: 1 }}>
+                        {text(item.name, {
+                          color: active ? c.primary : c.text,
+                        })}
+                      </View>
+                      <MaterialIcons
+                        name={
+                          active
+                            ? "radio-button-checked"
+                            : "radio-button-unchecked"
+                        }
+                        size={22}
+                        color={active ? c.primary : c.secondary}
+                      />
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
+        <Modal
           visible={settings}
           transparent
           animationType="fade"
@@ -838,6 +958,24 @@ const s = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     gap: 8,
+  },
+  select: {
+    flex: 1,
+    minHeight: 50,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  option: {
+    minHeight: 52,
+    padding: 12,
+    borderRadius: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
   },
   row: { flexDirection: "row", alignItems: "center", gap: 8 },
   wrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },

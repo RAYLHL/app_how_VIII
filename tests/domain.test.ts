@@ -28,7 +28,7 @@ test("limites municipais, ruas e exemplos respeitam as três cidades", () => {
       assert.equal(cityAt(streetPoint(street, city.center))?.id, city.id);
   }
   assert.equal(cityAt(point(0, 0)), undefined);
-  assert.equal(seedReports().length, 9);
+  assert.equal(seedReports().length, 108);
   assert(seedReports().every(validReport));
 });
 test("polígono exclui buracos e inclui borda exterior", () => {
@@ -128,4 +128,30 @@ test("gestos movem no sentido correto e respeitam limites de escala e região", 
   const edge = moveCamera(c, 1e9, 1e9);
   assert.equal(edge.center.latitude, -26.7);
   assert.equal(edge.center.longitude, -48.95);
+});
+
+
+test("nova base distribui categorias e migra apenas os exemplos antigos", async () => {
+  const examples = seedReports(1000000000);
+  assert.equal(new Set(examples.map((r) => r.id)).size, 108);
+  for (const city of cities) {
+    const rows = examples.filter((r) => r.cityId === city.id);
+    assert.equal(rows.length, 36);
+    assert.equal(new Set(rows.map((r) => r.address)).size, 36);
+    for (let c = 0; c < 9; c++) assert.equal(rows.filter((r) => r.category === c).length, 4);
+  }
+  const personal = { ...examples[0], id: "personal", demo: false, following: true };
+  let raw = JSON.stringify([personal, { ...examples[1], id: "EX-1" }]);
+  let writes = 0;
+  const repo = new Reports({ read: async () => raw, write: async (value) => { raw = value; writes++; } });
+  await repo.load();
+  assert.equal(repo.rows.length, 109);
+  assert.deepEqual(repo.rows.find((r) => r.id === personal.id), personal);
+  assert(!repo.rows.some((r) => r.id === "EX-1"));
+  await repo.support(repo.rows[1].id);
+  const saved = raw;
+  const count = writes;
+  await repo.load();
+  assert.equal(raw, saved);
+  assert.equal(writes, count);
 });
