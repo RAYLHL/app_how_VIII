@@ -1,3 +1,15 @@
+<p align="center">
+  <img src="docs/images/zelo-cover.png" alt="Zelo — Cuidar da cidade começa com você. Ilustração de um mapa urbano." width="100%" />
+</p>
+
+<p align="center">
+  <a href="#sobre-o-projeto">Projeto</a> ·
+  <a href="#-explore-sua-cidade">Experiência</a> ·
+  <a href="#-tecnologias-e-organização">Tecnologias</a> ·
+  <a href="#-verificação-e-testes">Testes</a> ·
+  <a href="#-equipe">Equipe</a>
+</p>
+
 # 📍 Zelo
 
 ### Cuidar da cidade começa com você.
@@ -25,6 +37,8 @@ A navegação está organizada em três áreas:
 | **Mapa** | Ocorrências, pesquisa de ruas, filtros e acesso ao cadastro. |
 | **Perto de mim** | Relatos em um raio de 1, 3 ou 5 km da posição obtida pelo aplicativo. |
 | **Acompanhando** | Ocorrências que você escolheu acompanhar e seus novos relatos. |
+
+![Fluxo do Zelo em três etapas: encontre o ponto, descreva a ocorrência e acompanhe o relato.](docs/images/zelo-experiencia.png)
 
 ## 📝 Registre uma ocorrência
 
@@ -92,6 +106,8 @@ A continuidade do projeto prevê avaliação com usuários, sincronização de d
 
 ## 🛠️ Tecnologias e organização
 
+![Organização do Zelo: interface com React Native, mapa com react-native-svg e recursos do aparelho com Expo.](docs/images/zelo-tecnologias.png)
+
 O Zelo utiliza **React Native**, **TypeScript** e **Expo** para construir a interface Android e integrar os recursos do aparelho. As regras dos relatos, os dados geográficos e os serviços do dispositivo ficam separados para facilitar a manutenção e a evolução do projeto.
 
 | Tecnologia | Aplicação no projeto |
@@ -127,6 +143,8 @@ Zelo-Flutter/
 A pasta local mantém o nome `Zelo-Flutter`, mas a implementação atual utiliza React Native.
 
 ## ✅ Verificação e testes
+
+![Verificação do Zelo: tipos com TypeScript, análise com ESLint e nove testes automatizados de domínio.](docs/images/zelo-verificacao.png)
 
 A qualidade do código é acompanhada por verificações de tipos, análise estática e testes automatizados. Para executá-los, instale as dependências e utilize os comandos abaixo na raiz do projeto:
 
@@ -173,3 +191,5 @@ Projeto **HOW VIII — Hands on Work**
 
 Dados de ruas: **OpenStreetMap contributors**, sob licença ODbL 1.0.  
 Limites municipais: **Instituto Brasileiro de Geografia e Estatística — IBGE**.
+
+*As imagens são ilustrações explicativas do projeto, não capturas de tela do aplicativo.*
